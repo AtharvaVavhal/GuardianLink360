@@ -1,7 +1,7 @@
 const axios = require('axios');
 const logger = require('./logger');
 
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5000';
 
 /**
  * Call P4's Flask scam detection API
