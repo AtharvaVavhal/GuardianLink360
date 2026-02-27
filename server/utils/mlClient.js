@@ -3,31 +3,25 @@ const logger = require('./logger');
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5000';
 
-/**
- * Call P4's Flask scam detection API
- * @param {string} text - call transcript or caller details
- * @returns {{ riskScore: number, isScam: boolean, reason: string }}
- */
 const detectScam = async (text) => {
   try {
-    const response = await axios.post(`${ML_SERVICE_URL}/detect`, {
-      text
+    const response = await axios.post(`${ML_SERVICE_URL}/api/analyze`, {
+      transcript: text  // P4 uses "transcript" not "text"
     }, {
-      timeout: 5000 // 5 second timeout — don't let P4 slow down P3
+      timeout: 5000
     });
 
-    const { riskScore, isScam, reason } = response.data;
+    const data = response.data;
+
+    const riskScore = data.risk_score ?? 50;
+    const isScam = data.is_scam ?? false;
+    const reason = data.reason ?? data.verdict ?? 'No reason provided';
 
     logger.success(`ML detection complete — Risk: ${riskScore}, Scam: ${isScam}`);
 
-    return {
-      riskScore: riskScore ?? 50,
-      isScam: isScam ?? false,
-      reason: reason ?? 'No reason provided'
-    };
+    return { riskScore, isScam, reason };
 
   } catch (error) {
-    // If P4 is down, don't crash P3 — fallback gracefully
     logger.error(`ML service unreachable: ${error.message}`);
     return {
       riskScore: 50,
@@ -37,4 +31,22 @@ const detectScam = async (text) => {
   }
 };
 
-module.exports = { detectScam };
+const fullShieldCheck = async (transcript, amount = 0, callDuration = 0) => {
+  try {
+    const response = await axios.post(`${ML_SERVICE_URL}/api/shield`, {
+      transcript,
+      amount,
+      call_duration: callDuration
+    }, {
+      timeout: 5000
+    });
+
+    return response.data;
+
+  } catch (error) {
+    logger.error(`ML shield check failed: ${error.message}`);
+    return null;
+  }
+};
+
+module.exports = { detectScam, fullShieldCheck };
