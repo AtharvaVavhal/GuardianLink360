@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getGuardianAlerts, getIncidents, getStats, resolveIncident } = require('../controllers/dashboardController');
+const { getGuardianAlerts, getIncidents, getStats } = require('../controllers/dashboardController');
 
 // GET /api/dashboard/alerts/:guardianPhone
 router.get('/alerts/:guardianPhone', getGuardianAlerts);
@@ -10,8 +10,5 @@ router.get('/incidents/:guardianPhone', getIncidents);
 
 // GET /api/dashboard/stats/:guardianPhone
 router.get('/stats/:guardianPhone', getStats);
-
-// POST /api/dashboard/resolve/:incidentId  ← used by GuardianDashboard
-router.post('/resolve/:incidentId', resolveIncident);
 
 module.exports = router;

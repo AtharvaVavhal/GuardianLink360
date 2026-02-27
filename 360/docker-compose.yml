@@ -1,0 +1,100 @@
+version: '3.9'
+
+services:
+
+  # ── MongoDB ────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7.0
+    container_name: gl360-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Node.js Backend ────────────────────────────────────────────────────────
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: gl360-server
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      MONGODB_URI: mongodb://mongo:27017/gurdianlink360
+      JWT_SECRET: ${JWT_SECRET:-gl360_super_secret_change_in_prod}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER}
+      ML_SERVICE_URL: http://ml-service:5000
+      CLIENT_URL: http://localhost:3000
+      DASHBOARD_URL: http://localhost:3002
+    depends_on:
+      mongo:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Python ML Service ──────────────────────────────────────────────────────
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: gl360-ml
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Senior PWA (React) ─────────────────────────────────────────────────────
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:5001
+        REACT_APP_SOCKET_URL: http://localhost:5001
+    container_name: gl360-client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+  # ── Guardian Dashboard (React) ─────────────────────────────────────────────
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:5001
+        REACT_APP_SOCKET_URL: http://localhost:5001
+    container_name: gl360-dashboard
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
