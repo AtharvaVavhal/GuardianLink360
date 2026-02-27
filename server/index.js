@@ -1,6 +1,11 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
+
+console.log('[ENV CHECK] TWILIO_SID:', process.env.TWILIO_ACCOUNT_SID ? '✅ loaded' : '❌ MISSING');
+console.log('[ENV CHECK] TWILIO_TOKEN:', process.env.TWILIO_AUTH_TOKEN ? '✅ loaded' : '❌ MISSING');
+console.log('[ENV CHECK] JWT_SECRET:', process.env.JWT_SECRET ? '✅ loaded' : '❌ MISSING');
+console.log('[ENV CHECK] MONGODB_URI:', process.env.MONGODB_URI ? '✅ loaded' : '❌ MISSING');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
