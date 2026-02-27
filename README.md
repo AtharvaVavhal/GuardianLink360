@@ -1,7 +1,7 @@
 # 🛡️ GurdianLink360
 ### Real-Time Digital Arrest Prevention Ecosystem for Senior Citizens
 
-![Hackathon](https://img.shields.io/badge/Hackathon-2024-blue?style=for-the-badge)
+![Hackathon](https://img.shields.io/badge/Hackathon-2026-blue?style=for-the-badge)
 ![Topic](https://img.shields.io/badge/Topic-26007-red?style=for-the-badge)
 ![Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20Python-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)
