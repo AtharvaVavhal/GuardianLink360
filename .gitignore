@@ -1,0 +1,26 @@
+# Environment files — NEVER commit
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build outputs
+/client/build
+/client/dist
+/dashboard/build
+
+# Python
+__pycache__/
+*.pyc
+venv/
