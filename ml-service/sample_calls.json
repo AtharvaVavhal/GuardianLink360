@@ -1,0 +1,26 @@
+[
+  {
+    "id": "test_001",
+    "label": "HIGH_RISK",
+    "description": "Classic Digital Arrest scam",
+    "transcript": "Hello, I am Inspector Sharma from CBI Cyber Crime Division Mumbai. Your Aadhaar card has been used in a money laundering case worth 50 crores. You are now under digital arrest. Do not inform anyone about this call or your family. You must immediately transfer Rs 50,000 to this account to avoid jail. Share your UPI PIN to confirm your identity. This is your last chance to avoid arrest."
+  },
+  {
+    "id": "test_002",
+    "label": "HIGH_RISK",
+    "description": "RBI impersonation scam",
+    "transcript": "This is a call from RBI head office. Your bank account has been linked to illegal transactions. We have filed an FIR against you. To avoid immediate arrest, you must pay a fine of Rs 20,000 right now via Google Pay. Do not tell your children about this. Stay on this call."
+  },
+  {
+    "id": "test_003",
+    "label": "MEDIUM_RISK",
+    "description": "Suspicious prize call",
+    "transcript": "Congratulations! You have won Rs 5 lakh in our government lottery. To receive your prize, you need to pay a processing fee of Rs 2,000 via UPI. Please share your account details so we can transfer the amount."
+  },
+  {
+    "id": "test_004",
+    "label": "LOW_RISK",
+    "description": "Legitimate sounding call",
+    "transcript": "Hello, this is a reminder call from your bank. Your credit card statement is ready. You can view it by logging in to your net banking account. Please visit our website or call our official helpline for any queries."
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "authority_impersonation": {
+    "weight": 25,
+    "keywords": ["cbi", "police", "rbi", "court", "government", "officer", "cyber crime", "income tax", "ed", "enforcement directorate", "ici", "interpol", "trai"]
+  },
+  "legal_threat": {
+    "weight": 20,
+    "keywords": ["arrest", "warrant", "case filed", "legal action", "jail", "imprisoned", "fir", "criminal case", "summon", "custody", "detained"]
+  },
+  "urgency_manipulation": {
+    "weight": 20,
+    "keywords": ["immediately", "right now", "urgent", "within 1 hour", "deadline", "last chance", "today only", "no time", "hurry", "quick"]
+  },
+  "money_demand": {
+    "weight": 25,
+    "keywords": ["transfer money", "send money", "pay fine", "upi", "bank account", "payment", "deposit", "wire transfer", "google pay", "phonepay", "paytm", "neft", "rtgs"]
+  },
+  "credential_request": {
+    "weight": 15,
+    "keywords": ["otp", "pin", "password", "share your", "tell me the code", "cvv", "card number", "aadhaar", "pan card", "account number"]
+  },
+  "isolation_attempt": {
+    "weight": 10,
+    "keywords": ["don't tell anyone", "keep this secret", "do not inform family", "alone", "do not call anyone", "stay on call", "digital arrest", "house arrest"]
+  }
+}
