@@ -2,6 +2,7 @@ const Alert = require('../models/Alert');
 const Incident = require('../models/Incident');
 const User = require('../models/User');
 const { sendSMSAlert, sendWhatsAppAlert } = require('./twilioController');
+const { detectScam } = require('../utils/mlClient');
 const logger = require('../utils/logger');
 
 // POST /api/alert/panic
@@ -19,35 +20,38 @@ const triggerPanic = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Senior not found' });
     }
 
-    // 2. Save alert to MongoDB
+    // 2. Call P4 ML service for risk score
+    const mlResult = await detectScam(`PANIC button triggered by senior citizen ${senior.name}`);
+
+    // 3. Save alert to MongoDB
     const alert = await Alert.create({
       seniorPhone: senior.phone,
       guardianPhone: senior.guardianPhone,
       type: 'PANIC',
-      riskScore: 100,
-      details: 'PANIC button manually triggered by senior citizen'
+      riskScore: mlResult.riskScore || 100,
+      details: `PANIC button manually triggered by senior citizen. ML Reason: ${mlResult.reason}`
     });
 
-    // 3. Save incident
+    // 4. Save incident
     await Incident.create({
       seniorPhone: senior.phone,
       guardianPhone: senior.guardianPhone,
       alertType: 'PANIC',
-      riskScore: 100,
+      riskScore: mlResult.riskScore || 100,
       status: 'OPEN'
     });
 
-    // 4. Send SMS + WhatsApp
+    // 5. Send SMS + WhatsApp
     await sendSMSAlert(senior.guardianPhone, senior.name, 'PANIC');
     await sendWhatsAppAlert(senior.guardianPhone, senior.name, 'PANIC');
 
-    // 5. Emit real-time Socket.io event to guardian dashboard
+    // 6. Emit real-time Socket.io event to guardian dashboard
     const io = req.app.get('io');
     io.to(senior.guardianPhone).emit('panic-alert', {
       seniorName: senior.name,
       seniorPhone: senior.phone,
       alertId: alert._id,
-      riskScore: 100,
+      riskScore: mlResult.riskScore || 100,
       type: 'PANIC',
       timestamp: new Date()
     });
@@ -70,26 +74,34 @@ const verifyCaller = async (req, res) => {
       return res.status(400).json({ success: false, message: 'seniorPhone and callerName required' });
     }
 
-    // Simulate fake officer database check
+    // 1. Call P4 ML service with caller details
+    const mlText = `Caller: ${callerName}, Department: ${callerDepartment || 'Unknown'}, Badge: ${callerBadge || 'Unknown'}`;
+    const mlResult = await detectScam(mlText);
+
+    // 2. Also run local keyword check as backup
     const knownScamPhrases = [
       'cbi', 'narcotics', 'digital arrest', 'cyber crime',
       'money laundering', 'ied', 'enforcement directorate'
     ];
 
-    const isScam = knownScamPhrases.some(phrase =>
+    const localScamDetected = knownScamPhrases.some(phrase =>
       callerName.toLowerCase().includes(phrase) ||
       (callerDepartment && callerDepartment.toLowerCase().includes(phrase))
     );
 
+    // 3. Combine ML + local detection (either one flags = scam)
+    const isScam = mlResult.isScam || localScamDetected;
+    const riskScore = isScam ? Math.max(mlResult.riskScore, 85) : mlResult.riskScore;
+
     const result = {
       isVerified: !isScam,
-      riskScore: isScam ? 95 : 10,
+      riskScore,
       message: isScam
         ? '⚠️ WARNING: This caller matches known scam patterns. NO legitimate officer will call like this.'
         : '✅ No immediate red flags. But stay cautious — real officers never demand money on calls.'
     };
 
-    // Save alert if scam detected
+    // 4. Save alert if scam detected
     if (isScam) {
       const senior = await User.findOne({ phone: seniorPhone });
       if (senior) {
@@ -97,8 +109,8 @@ const verifyCaller = async (req, res) => {
           seniorPhone: senior.phone,
           guardianPhone: senior.guardianPhone,
           type: 'VERIFY_CALLER',
-          riskScore: 95,
-          details: `Suspicious caller: ${callerName} from ${callerDepartment}`
+          riskScore,
+          details: `Suspicious caller: ${callerName} from ${callerDepartment}. ML: ${mlResult.reason}`
         });
 
         const io = req.app.get('io');
@@ -106,7 +118,7 @@ const verifyCaller = async (req, res) => {
           seniorName: senior.name,
           callerName,
           callerDepartment,
-          riskScore: 95,
+          riskScore,
           timestamp: new Date()
         });
 
