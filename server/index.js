@@ -28,7 +28,7 @@ const server = http.createServer(app);
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
-   'http://localhost:3002',
+  'http://localhost:3002',  // ← add this
   process.env.CLIENT_URL,
   process.env.DASHBOARD_URL,
 ].filter(Boolean);
