@@ -18,10 +18,18 @@ const dashboardRoutes = require('./routes/dashboard');
 // ─── Initialize ───────────────────────────────────────────
 const app = express();
 const server = http.createServer(app);
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  process.env.CLIENT_URL,
+  process.env.DASHBOARD_URL,
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST']
+    origin: ALLOWED_ORIGINS,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
@@ -29,7 +37,12 @@ const io = new Server(server, {
 connectDB();
 
 // ─── Middleware ────────────────────────────────────────────
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+app.use(cors({
+  origin: ALLOWED_ORIGINS,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Make io accessible in all controllers

@@ -1,5 +1,9 @@
 const logger = require('../utils/logger');
 
+// ───────────────────────────────────────────────────────────
+// Send SMS panic alert to guardian
+// Called by alertController when senior hits PANIC
+// ───────────────────────────────────────────────────────────
 const sendSMSAlert = async (guardianPhone, seniorName, alertType) => {
   try {
     const twilio = require('twilio');
@@ -9,20 +13,23 @@ const sendSMSAlert = async (guardianPhone, seniorName, alertType) => {
     );
 
     await client.messages.create({
-      body: `🚨 GURDIANLINK360 ALERT: ${seniorName} triggered a ${alertType} alert. Login to dashboard immediately at http://localhost:3000/guardian`,
+      body: `🚨 GUARDIANLINK360 ALERT: ${seniorName} triggered a ${alertType} alert. Login to your dashboard immediately.`,
       from: process.env.TWILIO_PHONE_NUMBER,
-      to: guardianPhone
+      to: guardianPhone,
     });
 
-    logger.success(`SMS sent to ${guardianPhone}`);
+    logger.success(`SMS alert sent to guardian: ${guardianPhone}`);
     return true;
 
   } catch (error) {
-    logger.error(`SMS failed: ${error.message}`);
+    logger.error(`SMS alert failed: ${error.message}`);
     return false;
   }
 };
 
+// ───────────────────────────────────────────────────────────
+// Send WhatsApp panic alert to guardian
+// ───────────────────────────────────────────────────────────
 const sendWhatsAppAlert = async (guardianPhone, seniorName, alertType) => {
   try {
     const twilio = require('twilio');
@@ -32,16 +39,16 @@ const sendWhatsAppAlert = async (guardianPhone, seniorName, alertType) => {
     );
 
     await client.messages.create({
-      body: `🚨 *GURDIANLINK360 ALERT*\n\n*${seniorName}* triggered a *${alertType}* alert.\n\nLogin to dashboard immediately.\n\nTime: ${new Date().toLocaleString('en-IN')}`,
+      body: `🚨 *GUARDIANLINK360 ALERT*\n\n*${seniorName}* triggered a *${alertType}* alert.\n\nLogin to your dashboard immediately.\n\nTime: ${new Date().toLocaleString('en-IN')}`,
       from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-      to: `whatsapp:${guardianPhone}`
+      to: `whatsapp:${guardianPhone}`,
     });
 
-    logger.success(`WhatsApp sent to ${guardianPhone}`);
+    logger.success(`WhatsApp alert sent to guardian: ${guardianPhone}`);
     return true;
 
   } catch (error) {
-    logger.error(`WhatsApp failed: ${error.message}`);
+    logger.error(`WhatsApp alert failed: ${error.message}`);
     return false;
   }
 };

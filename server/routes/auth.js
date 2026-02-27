@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getUser } = require('../controllers/authController');
+const { register, login, getUser, requestOTP, verifyOTP } = require('../controllers/authController');
 
-// POST /api/auth/register
-router.post('/register', register);
+// ── OTP login (used by P1 Senior App) ─────────────────────
+router.post('/otp/request', requestOTP);   // POST /api/auth/otp/request
+router.post('/otp/verify', verifyOTP);     // POST /api/auth/otp/verify
 
-// POST /api/auth/login
-router.post('/login', login);
-
-// GET /api/auth/user/:phone
-router.get('/user/:phone', getUser);
+// ── Standard routes ────────────────────────────────────────
+router.post('/register', register);        // POST /api/auth/register
+router.post('/login', login);              // POST /api/auth/login  (Guardian)
+router.get('/user/:phone', getUser);       // GET  /api/auth/user/:phone
 
 module.exports = router;
